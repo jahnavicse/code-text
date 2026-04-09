@@ -1,0 +1,73 @@
+17. 
+using System;
+
+public class HelloWorld
+{
+    public static void Main(string[] args)
+    {
+       string a= "hello";
+       a= a + " world";
+       Console.WriteLine(a);
+    }
+}
+
+18.// Online C# Editor for free
+// Write, Edit and Run your C# code using C# Online Compiler
+
+using System;
+
+public class HelloWorld
+{
+    public static void Main(string[] args)
+    {
+      string a = "ritwik";
+      string b= "verma";
+      string res = a + " " + b;
+      Console.WriteLine(res);
+    }
+}
+19.// Online C# Editor for free
+// Write, Edit and Run your C# code using C# Online Compiler
+
+using System;
+
+public class HelloWorld
+{
+    public static void Main(string[] args)
+    {
+      
+    string text = "welcome to C#";
+    bool found = text.Contains ("C#");
+    Console.WriteLine(found);
+    }
+}
+20.// Online C# Editor for free
+// Write, Edit and Run your C# code using C# Online Compiler
+
+using System;
+
+public class HelloWorld
+{
+    public static void Main(string[] args)
+    {
+      
+     string name = "HI RITWIK";
+     string lower = name.ToLower();
+     Console.WriteLine(lower);
+    }
+}
+21.// Online C# Editor for free
+// Write, Edit and Run your C# code using C# Online Compiler
+
+using System;
+
+public class HelloWorld
+{
+    public static void Main(string[] args)
+    {
+      
+     string name ="ritwik";
+     Console.WriteLine($"my name is {name}");
+    }
+}
+22.
