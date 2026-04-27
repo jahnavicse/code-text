@@ -1,0 +1,399 @@
+*
+
+* Database Engine (Storage Engine + Query Processor)
+* SQL Server Instance
+* Databases
+* Memory & Buffer Cache
+* SQL Server Services
+* Security & Authentication
+* Client Tools
+
+---
+
+### **2. SQL Server Instance vs Database**
+
+* **Instance**: A complete SQL Server installation (runs services, manages multiple databases).
+* **Database**: A collection of tables, views, procedures inside an instance.
+
+👉 One instance can contain **multiple databases**.
+
+---
+
+### **3. Three SQL Server Services**
+
+* SQL Server Database Engine
+* SQL Server Agent
+* SQL Server Browser
+
+---
+
+### **4. SSMS usage**
+
+**SQL Server Management Studio (SSMS)** is used to:
+
+* Connect to SQL Server
+* Write & execute queries
+* Manage databases, tables, users
+* Monitor performance
+
+---
+
+# **Section B: Data Types**
+
+### **5. Table with numeric & date/time**
+
+```sql
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    Amount DECIMAL(10,2),   -- exact numeric
+    OrderDate DATETIME      -- date/time
+);
+```
+
+---
+
+### **6. char vs varchar**
+
+* `CHAR(n)` → Fixed length (pads spaces)
+* `VARCHAR(n)` → Variable length (saves space)
+
+---
+
+### **7. uniqueidentifier & rowversion**
+
+* `UNIQUEIDENTIFIER` → Stores GUID (globally unique ID)
+* `ROWVERSION` → Auto-generated binary number for version tracking
+
+---
+
+### **8. Store binary data**
+
+```sql
+CREATE TABLE Files (
+    FileID INT PRIMARY KEY,
+    FileData VARBINARY(MAX)
+);
+
+INSERT INTO Files VALUES (1, 0xFFD8FFE0);  -- sample binary
+```
+
+---
+
+# **Section C: Constraints**
+
+### **9. Table with constraints**
+
+```sql
+CREATE TABLE Departments (
+    DeptID INT PRIMARY KEY,
+    DeptName VARCHAR(50)
+);
+
+CREATE TABLE Employees (
+    EmpID INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Salary DECIMAL(10,2),
+    DeptID INT,
+    CONSTRAINT FK_Dept FOREIGN KEY (DeptID) REFERENCES Departments(DeptID),
+    CONSTRAINT CHK_Salary CHECK (Salary > 0)
+);
+```
+
+---
+
+### **10. UNIQUE vs PRIMARY KEY**
+
+* **PRIMARY KEY** → Unique + NOT NULL (only one per table)
+* **UNIQUE** → Unique but allows one NULL (can have multiple)
+
+---
+
+### **11. Add NOT NULL constraint**
+
+```sql
+ALTER TABLE Employees
+ALTER COLUMN Name VARCHAR(50) NOT NULL;
+```
+
+---
+
+# **Section D: Querying**
+
+### **12. Select all**
+
+```sql
+SELECT * FROM Employees;
+```
+
+---
+
+### **13. Select & sort**
+
+```sql
+SELECT Name, Salary
+FROM Employees
+ORDER BY Salary DESC;
+```
+
+---
+
+### **14. WHERE with AND/OR**
+
+```sql
+SELECT *
+FROM Employees
+WHERE (DeptID = 1 AND Salary > 50000)
+   OR (DeptID = 2);
+```
+
+---
+
+### **15. DISTINCT & BETWEEN**
+
+```sql
+SELECT DISTINCT DeptID
+FROM Employees;
+
+SELECT *
+FROM Employees
+WHERE Salary BETWEEN 30000 AND 70000;
+```
+
+---
+
+# **Section E: Joins & Grouping**
+
+### **16. INNER JOIN**
+
+```sql
+SELECT E.Name, D.DeptName
+FROM Employees E
+INNER JOIN Departments D
+ON E.DeptID = D.DeptID;
+```
+
+---
+
+### **17. LEFT JOIN vs RIGHT JOIN**
+
+```sql
+-- LEFT JOIN
+SELECT E.Name, D.DeptName
+FROM Employees E
+LEFT JOIN Departments D
+ON E.DeptID = D.DeptID;
+```
+
+* **LEFT JOIN** → All rows from left table
+* **RIGHT JOIN** → All rows from right table
+
+---
+
+### **18. GROUP BY & HAVING**
+
+```sql
+SELECT DeptID, AVG(Salary) AS AvgSalary
+FROM Employees
+GROUP BY DeptID
+HAVING AVG(Salary) > 50000;
+```
+
+---
+
+### **19. ROLLUP vs CUBE**
+
+* **ROLLUP** → Hierarchical totals
+* **CUBE** → All possible combinations of grouping
+
+---
+
+# **Section F: Subqueries & Set Operators**
+
+### **20. Subquery (above average salary)**
+
+```sql
+SELECT *
+FROM Employees
+WHERE Salary > (SELECT AVG(Salary) FROM Employees);
+```
+
+---
+
+### **21. EXISTS / NOT EXISTS**
+
+```sql
+-- EXISTS
+SELECT Name
+FROM Employees E
+WHERE EXISTS (
+    SELECT 1 FROM Departments D WHERE D.DeptID = E.DeptID
+);
+
+-- NOT EXISTS
+SELECT Name
+FROM Employees E
+WHERE NOT EXISTS (
+    SELECT 1 FROM Departments D WHERE D.DeptID = E.DeptID
+);
+```
+
+---
+
+### **22. UNION vs UNION ALL**
+
+```sql
+SELECT Name FROM Employees
+UNION
+SELECT DeptName FROM Departments;
+```
+
+* **UNION** → Removes duplicates
+* **UNION ALL** → Keeps duplicates (faster)
+
+---
+
+### **23. INTERSECT & EXCEPT**
+
+```sql
+-- INTERSECT
+SELECT DeptID FROM Employees
+INTERSECT
+SELECT DeptID FROM Departments;
+
+-- EXCEPT
+SELECT DeptID FROM Employees
+EXCEPT
+SELECT DeptID FROM Departments;
+```
+
+---
+
+# **Section G: Modifying Data**
+
+### **24. INSERT, UPDATE, DELETE**
+
+```sql
+-- INSERT
+INSERT INTO Employees (EmpID, Name, Salary, DeptID)
+VALUES (1, 'John', 50000, 1);
+
+-- UPDATE
+UPDATE Employees
+SET Salary = 60000
+WHERE EmpID = 1;
+
+-- DELETE
+DELETE FROM Employees
+WHERE EmpID = 1;
+```
+
+---
+
+### **25. MERGE**
+
+```sql
+MERGE Employees AS target
+USING NewEmployees AS source
+ON target.EmpID = source.EmpID
+
+WHEN MATCHED THEN
+    UPDATE SET target.Salary = source.Salary
+
+WHEN NOT MATCHED THEN
+    INSERT (EmpID, Name, Salary, DeptID)
+    VALUES (source.EmpID, source.Name, source.Salary, source.DeptID);
+```
+
+---
+
+# **Section H: Procedures & Functions**
+
+### **26. Stored Procedure**
+
+```sql
+CREATE PROCEDURE GetEmployeesByDept
+    @DeptName VARCHAR(50)
+AS
+BEGIN
+    SELECT E.*
+    FROM Employees E
+    JOIN Departments D ON E.DeptID = D.DeptID
+    WHERE D.DeptName = @DeptName;
+END;
+```
+
+---
+
+### **27. Scalar Function**
+
+```sql
+CREATE FUNCTION dbo.GetAnnualSalary (@MonthlySalary DECIMAL(10,2))
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    RETURN @MonthlySalary * 12;
+END;
+```
+
+---
+
+### **28. Table-Valued Function**
+
+```sql
+CREATE FUNCTION dbo.GetHighSalaryEmployees (@MinSalary DECIMAL(10,2))
+RETURNS TABLE
+AS
+RETURN (
+    SELECT *
+    FROM Employees
+    WHERE Salary > @MinSalary
+);
+```
+
+---
+
+# **Section I: Triggers & Exception Handling**
+
+### **29. Trigger for salary updates**
+
+```sql
+CREATE TABLE SalaryLog (
+    LogID INT IDENTITY PRIMARY KEY,
+    EmpID INT,
+    OldSalary DECIMAL(10,2),
+    NewSalary DECIMAL(10,2),
+    ChangedOn DATETIME DEFAULT GETDATE()
+);
+
+CREATE TRIGGER trg_SalaryUpdate
+ON Employees
+AFTER UPDATE
+AS
+BEGIN
+    INSERT INTO SalaryLog (EmpID, OldSalary, NewSalary)
+    SELECT d.EmpID, d.Salary, i.Salary
+    FROM deleted d
+    JOIN inserted i ON d.EmpID = i.EmpID
+    WHERE d.Salary <> i.Salary;
+END;
+```
+
+---
+
+### **30. TRY...CATCH with THROW**
+
+```sql
+BEGIN TRY
+    DECLARE @a INT = 10, @b INT = 0;
+    SELECT @a / @b;
+END TRY
+
+BEGIN CATCH
+    PRINT 'Error occurred: ' + ERROR_MESSAGE();
+    THROW;  -- re-raise error
+END CATCH;
+```
+
+---
+
+.
